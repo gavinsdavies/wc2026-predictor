@@ -9,7 +9,7 @@
 //         fixtures: [
 //           {
 //             match,                           // raw match object
-//             viewerTime, venueTime,           // formatted strings
+//             timeText,                        // formatted kickoff line
 //             homeCode, homeName, homeAbbr, homeFlag,   // resolved (or null)
 //             awayCode, awayName, awayAbbr, awayFlag,
 //             homeLabel, awayLabel,            // placeholder strings if unresolved
@@ -193,7 +193,7 @@ function _renderCentre(f, view) {
   const m = f.match;
   const meta = `
     <div class="fixture-meta">
-      <span>${_esc(f.viewerTime)}</span>
+      <span>${_esc(f.timeText)}</span>
       <span class="venue">${_esc(m.stadium)} &middot; ${_esc(m.city)}</span>
       ${m.stage !== 'First Stage' ? `<span>${_esc(m.stage)}</span>` : ''}
     </div>
