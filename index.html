@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WC 2026 Predictor</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-title">
+        <span class="header-trophy">&#9917;</span>
+        <div>
+          <h1 class="header-wordmark">World Cup 2026</h1>
+          <p class="header-sub">USA &middot; Canada &middot; Mexico</p>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <div class="view-toggle" role="group" aria-label="View mode">
+          <button class="toggle-btn active" data-view="actual" id="btn-actual">Actual</button>
+          <button class="toggle-btn" data-view="predicted" id="btn-predicted">Predicted</button>
+        </div>
+
+        <div class="score-badge" id="score-badge" title="Your total points">
+          <span class="score-badge-value" id="score-total">0</span>
+          <span class="score-badge-label">pts</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tab-nav" role="tablist">
+    <button class="tab-btn active" data-tab="fixtures" role="tab">Fixtures</button>
+    <button class="tab-btn" data-tab="groups" role="tab">Groups</button>
+    <button class="tab-btn" data-tab="bracket" role="tab">Bracket</button>
+    <button class="tab-btn" data-tab="score" role="tab">Score</button>
+  </nav>
+
+  <div class="toolbar">
+    <div class="toolbar-filters" id="toolbar-filters">
+      <!-- injected per tab -->
+    </div>
+    <div class="toolbar-actions">
+      <button class="action-btn" id="btn-export">Export</button>
+      <label class="action-btn" id="btn-import-label">
+        Import
+        <input type="file" id="import-file" accept=".json" style="display:none" />
+      </label>
+      <button class="action-btn danger" id="btn-clear">Clear All</button>
+    </div>
+  </div>
+
+  <main class="main-content" id="main-content">
+    <div class="loading-state" id="loading-state">
+      <div class="loading-spinner"></div>
+      <p>Loading fixtures&hellip;</p>
+    </div>
+  </main>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
