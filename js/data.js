@@ -49,26 +49,5 @@ export const STAGE_ORDER = [
 
 export const GROUPS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"];
 
-// --- kickoff formatting -------------------------------------------------
-// dateUTC is the true instant; localDate is venue wall-clock (carries a
-// spurious Z, so we read its components directly).
-
-export function viewerTime(match) {
-  if (!match.dateUTC) return "TBD";
-  const d = new Date(match.dateUTC);
-  return d.toLocaleString(undefined, {
-    weekday: "short", month: "short", day: "numeric",
-    hour: "2-digit", minute: "2-digit",
-  });
-}
-
-export function venueTime(match) {
-  if (!match.localDate) return "TBD";
-  // "2026-06-11T13:00:00Z" -> 13:00 (venue local)
-  const t = match.localDate.slice(11, 16);
-  return `${t} local`;
-}
-
-export function kickoffDayKey(match) {
-  return match.dateUTC ? match.dateUTC.slice(0, 10) : "TBD";
-}
+// Kickoff formatting + day bucketing now lives in timezone.js, so grouping and
+// display always share one timezone basis (see that module for the rationale).

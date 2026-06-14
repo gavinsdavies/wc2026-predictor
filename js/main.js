@@ -5,10 +5,16 @@ import {
   loadData,
   STAGE_ORDER,
   GROUPS,
-  viewerTime,
-  venueTime,
-  kickoffDayKey,
 } from './data.js';
+
+import {
+  dayKey,
+  dayHeading,
+  kickoffText,
+  getTZMode,
+  setTZMode,
+  TZ_OPTIONS,
+} from './timezone.js';
 
 import {
   getPrediction,
@@ -151,10 +157,11 @@ function renderTab_Fixtures(container, resultFn) {
     return true;
   });
 
-  // Group by day
+  // Group by day — key and heading both come from the active timezone basis,
+  // so the day a fixture is filed under always matches its displayed time.
   const dayMap = new Map();
   for (const m of filtered) {
-    const key = kickoffDayKey(m);
+    const key = dayKey(m);
     if (!dayMap.has(key)) dayMap.set(key, []);
     dayMap.get(key).push(m);
   }
@@ -162,11 +169,7 @@ function renderTab_Fixtures(container, resultFn) {
   const overrides = getOverrides();
 
   const days = [...dayMap.entries()].map(([key, matches]) => {
-    const label = key === 'TBD'
-      ? 'Date TBD'
-      : new Date(key + 'T12:00:00Z').toLocaleDateString(undefined, {
-          weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
-        });
+    const label = dayHeading(key);
 
     const fixtures = matches.map(m => {
       const prediction = getPrediction(m.id);
@@ -180,8 +183,7 @@ function renderTab_Fixtures(container, resultFn) {
 
       return {
         match: m,
-        viewerTime: viewerTime(m),
-        venueTime: venueTime(m),
+        timeText: kickoffText(m),
         homeCode: homeTeam?.code || null,
         homeName: homeTeam?.name || null,
         homeAbbr: homeTeam?.abbr || null,
@@ -356,6 +358,19 @@ function bindGlobalControls() {
       render();
     });
   });
+
+  // Timezone switcher — drives both grouping and display, so re-render on change
+  const tzSelect = document.getElementById('tz-select');
+  if (tzSelect) {
+    tzSelect.innerHTML = TZ_OPTIONS
+      .map(o => `<option value="${o.value}">${o.label}</option>`)
+      .join('');
+    tzSelect.value = getTZMode();
+    tzSelect.addEventListener('change', () => {
+      setTZMode(tzSelect.value);
+      render();
+    });
+  }
 
   // Export
   document.getElementById('btn-export')?.addEventListener('click', () => {
