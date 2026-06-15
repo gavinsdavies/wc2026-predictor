@@ -23,6 +23,7 @@ import {
   getOverrides,
   setOverride,
   clearOverrides,
+  clearOverridesMatchingActual,
   effectiveActual,
   exportJSON,
   importJSON,
@@ -45,12 +46,14 @@ let appView = 'actual';    // "actual" | "predicted"
 let appTab = 'fixtures';   // "fixtures" | "groups" | "bracket" | "score"
 let fixtureFilterStage = 'all';
 let fixtureFilterGroup = 'all';
+let editingActualOverrides = new Set();
 
 // ============================================================
 // BOOT
 // ============================================================
 async function init() {
   ctx = await loadData();
+  clearOverridesMatchingActual(ctx.matches);
   document.getElementById('loading-state')?.remove();
   bindGlobalControls();
   applyHash();
@@ -175,6 +178,7 @@ function renderTab_Fixtures(container, resultFn) {
       const prediction = getPrediction(m.id);
       const actual = effectiveActual(m, overrides);
       const overrideActive = !!(overrides[m.id] && overrides[m.id].home != null);
+      const overrideEditing = editingActualOverrides.has(m.id);
       const scoring = scoreMatch(prediction, actual);
 
       // Resolve team info (may be null for unplayed knockouts)
@@ -197,6 +201,7 @@ function renderTab_Fixtures(container, resultFn) {
         prediction,
         actual,
         overrideActive,
+        overrideEditing,
         scoring,
         isKnockout: !m.group,
       };
@@ -227,7 +232,17 @@ function renderTab_Fixtures(container, resultFn) {
       render();
     },
     onOverride(matchId, score) {
-      setOverride(matchId, score);
+      const match = ctx.byNumber.get(Number(matchId)) || ctx.matches.find(m => m.id === matchId);
+      if (_matchesActual(score, match?.actual)) {
+        setOverride(matchId, null);
+      } else {
+        setOverride(matchId, score);
+      }
+      render();
+    },
+    onToggleOverrideEditor(matchId, isEditing) {
+      if (isEditing) editingActualOverrides.add(matchId);
+      else editingActualOverrides.delete(matchId);
       render();
     },
     onFilterStage(value) {
@@ -246,6 +261,14 @@ function renderTab_Fixtures(container, resultFn) {
   };
 
   renderFixtures(container, vm, handlers);
+}
+
+function _matchesActual(score, actual) {
+  if (!score || !actual) return false;
+  return score.home === actual.home &&
+    score.away === actual.away &&
+    (score.penHome ?? null) === (actual.penHome ?? null) &&
+    (score.penAway ?? null) === (actual.penAway ?? null);
 }
 
 // ============================================================
