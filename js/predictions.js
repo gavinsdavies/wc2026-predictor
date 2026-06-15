@@ -53,6 +53,28 @@ export function setOverride(matchId, score) {
 
 export function clearOverrides() { localStorage.removeItem(OVERRIDE_KEY); }
 
+export function clearOverridesMatchingActual(matches) {
+  const all = read(OVERRIDE_KEY);
+  let changed = false;
+
+  for (const match of matches) {
+    const override = all[match.id];
+    const actual = match.actual;
+    if (!override || !actual) continue;
+
+    const sameScore = override.home === actual.home && override.away === actual.away;
+    const samePens = (override.penHome ?? null) === (actual.penHome ?? null) &&
+      (override.penAway ?? null) === (actual.penAway ?? null);
+
+    if (sameScore && samePens) {
+      delete all[match.id];
+      changed = true;
+    }
+  }
+
+  if (changed) write(OVERRIDE_KEY, all);
+}
+
 // Effective actual result for a match: hand override beats FIFA's snapshot.
 export function effectiveActual(match, overrides) {
   const o = overrides[match.id];

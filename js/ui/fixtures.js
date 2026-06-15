@@ -16,6 +16,7 @@
 //             prediction,                      // {home,away,winner?}|null
 //             actual,                          // {home,away}|null (effective)
 //             overrideActive,                  // bool — is there a manual override?
+//             overrideEditing,                 // bool — is the manual editor open?
 //             scoring,                         // {points,tier}|null
 //             isKnockout,                      // bool
 //           }
@@ -32,6 +33,7 @@
 // Handlers:
 //   onPrediction(matchId, {home, away, winner}) — user changed a prediction input
 //   onOverride(matchId, {home, away})           — user changed an actual override
+//   onToggleOverrideEditor(matchId, isEditing)
 //   onFilterStage(value)
 //   onFilterGroup(value)
 
@@ -73,19 +75,8 @@ export function renderFixtures(container, vm, handlers) {
   container.querySelectorAll('.override-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
       const matchId = btn.dataset.matchid;
-      const row = container.querySelector(`.fixture-row[data-matchid="${matchId}"]`);
-      const overrideSection = row?.querySelector('.override-section');
-      if (!overrideSection) return;
-      const isHidden = overrideSection.style.display === 'none' || overrideSection.style.display === '';
-      if (isHidden) {
-        overrideSection.style.display = 'block';
-        btn.classList.add('active');
-        btn.textContent = 'done';
-      } else {
-        overrideSection.style.display = 'none';
-        btn.classList.remove('active');
-        btn.textContent = 'edit';
-      }
+      const isEditing = btn.dataset.editing === 'true';
+      handlers.onToggleOverrideEditor(matchId, !isEditing);
     });
   });
 
@@ -233,8 +224,8 @@ function _renderCentre(f, view) {
     <div class="score-section">
       <span class="score-label">
         Actual
-        <button class="override-toggle${f.overrideActive ? ' active' : ''}" data-matchid="${_esc(m.id)}" title="Edit actual score">
-          ${f.overrideActive ? 'done' : 'edit'}
+        <button class="override-toggle${f.overrideActive || f.overrideEditing ? ' active' : ''}" data-matchid="${_esc(m.id)}" data-editing="${f.overrideEditing ? 'true' : 'false'}" title="Edit actual score">
+          ${f.overrideEditing ? 'done' : 'edit'}
         </button>
       </span>
       <div class="score-pair">
@@ -245,21 +236,21 @@ function _renderCentre(f, view) {
     </div>
   `;
 
-  const overrideHomeVal = f.overrideActive && act ? (act.home ?? '') : '';
-  const overrideAwayVal = f.overrideActive && act ? (act.away ?? '') : '';
+  const overrideHomeVal = f.overrideEditing && act ? (act.home ?? '') : '';
+  const overrideAwayVal = f.overrideEditing && act ? (act.away ?? '') : '';
 
   const overrideSection = `
-    <div class="override-section" style="${f.overrideActive ? 'display:block' : 'display:none'}">
+    <div class="override-section" style="${f.overrideEditing ? 'display:block' : 'display:none'}">
       <div class="score-pair" style="margin-top:4px;">
         <input type="number" min="0" max="30"
-          class="score-input override-input override-home${f.overrideActive ? ' override-mode' : ''}"
+          class="score-input override-input override-home${f.overrideEditing ? ' override-mode' : ''}"
           data-matchid="${_esc(m.id)}"
           value="${overrideHomeVal}"
           placeholder="–"
         />
         <span class="score-sep">:</span>
         <input type="number" min="0" max="30"
-          class="score-input override-input override-away${f.overrideActive ? ' override-mode' : ''}"
+          class="score-input override-input override-away${f.overrideEditing ? ' override-mode' : ''}"
           data-matchid="${_esc(m.id)}"
           value="${overrideAwayVal}"
           placeholder="–"
