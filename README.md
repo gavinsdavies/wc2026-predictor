@@ -10,6 +10,7 @@ FIFA.
 
 ```bash
 python3 fetch_data.py     # pull FIFA data -> data/ (matches, teams, flags)
+python3 generate_wc2026_ics.py  # optional: refresh wc2026.ics from data/
 ./serve.sh                # serve at http://localhost:8000
 ```
 
@@ -18,6 +19,27 @@ and (once decided) real knockout matchups.
 
 > Must be served over HTTP. Opening `index.html` via `file://` breaks ES-module
 > imports and `fetch()` of the local JSON.
+
+## Calendar file
+
+`wc2026.ics` is a generated iCalendar file containing all 104 fixtures. Import
+it into Google Calendar, Apple Calendar, Outlook, or any calendar app that
+supports `.ics` files. Event start/end times are written as UTC instants from
+`data/matches.json`, so calendar clients should display them in your selected
+timezone.
+
+Regenerate it after refreshing FIFA data:
+
+```bash
+python3 generate_wc2026_ics.py
+```
+
+Useful options:
+
+```bash
+python3 generate_wc2026_ics.py -o /tmp/wc2026.ics
+python3 generate_wc2026_ics.py --duration-minutes 150
+```
 
 ## What it does
 
@@ -57,6 +79,9 @@ normalized shape.
 
 ```
 fetch_data.py      FIFA -> data/ (stdlib only, no deps)
+generate_wc2026_ics.py
+                   data/matches.json -> wc2026.ics (stdlib only)
+wc2026.ics         importable calendar snapshot
 serve.sh           local static server
 index.html
 css/styles.css

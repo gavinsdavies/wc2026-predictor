@@ -1,2 +1,3 @@
 data/
 dev-validate.mjs
+__pycache__/
